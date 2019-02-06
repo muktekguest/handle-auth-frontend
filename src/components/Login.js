@@ -3,6 +3,13 @@ import React, { Component } from "react";
 
 
 export default class Login extends Component {
+  state = {
+    error: {
+      status: false,
+      message: ""
+    }
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
 
@@ -20,12 +27,20 @@ export default class Login extends Component {
     })
     .then(response => response.json())
     .then(data => {
-      localStorage.setItem("token", data.token);
-      const url = window.decodeURIComponent(this.props.location.search);
-      // this.props.history.push("/dashboard");
-      this.props.history.push("/" + url.split("/")[1]);
+      if(typeof data.token !== "undefined") {
+        localStorage.setItem("token", data.token);
+        const url = window.decodeURIComponent(this.props.location.search);
+        this.props.history.push("/" + url.split("/")[1]);
+      } else {
+        this.setState({
+          error: {
+            status: true,
+            message: data.message
+          }
+        })
+      }
     })
-    .catch(e => console.log(e));
+    .catch(e => alert(e));
   }
 
   render() {
@@ -39,6 +54,7 @@ export default class Login extends Component {
           <div>
             <input name="password" type="password" placeholder="password" />
           </div>
+          { this.state.error.status && <p>{ this.state.error.message }</p>}
           <input type="submit" value="Login" />
         </form>
       </div>
